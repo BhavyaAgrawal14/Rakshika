@@ -1,1 +1,14 @@
 @import "tailwindcss";
+
+:root {
+  --rak-primary: #4A102A;
+  --rak-secondary: #7C1D3D;
+  --rak-gold: #D6B370;
+  --rak-ivory: #FAF7F2;
+  --rak-charcoal: #2B2B2B;
+}
+
+body {
+  background-color: var(--rak-ivory);
+  color: var(--rak-charcoal);
+}
