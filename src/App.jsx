@@ -8,6 +8,7 @@ import Contacts from "./pages/Contacts";
 import SOSHistory from "./pages/SOSHistory";
 import Resources from "./pages/Resources";
 import Profile from "./pages/Profile";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 function App() {
   return (
@@ -16,7 +17,14 @@ function App() {
         <Route path="/" element={<Home />} />
         <Route path="/login" element={<Login />} />
         <Route path="/register" element={<Register />} />
-        <Route path="/dashboard" element={<Dashboard />} />
+        <Route
+          path="/dashboard"
+          element={
+            <ProtectedRoute>
+              <Dashboard />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/contacts" element={<Contacts />} />
         <Route path="/history" element={<SOSHistory />} />
         <Route path="/resources" element={<Resources />} />
