@@ -1,6 +1,15 @@
 import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
+import { useNavigate } from "react-router-dom";
 
 function Navbar() {
+  const { user, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate("/login");
+  };
   return (
     <nav
       className="flex justify-between items-center px-8 py-4 border-b sticky top-0 z-50"
@@ -37,21 +46,47 @@ function Navbar() {
       </div>
 
       <div className="flex gap-4 items-center">
-        <Link
-          to="/login"
-          className="font-medium hover:opacity-70 transition"
-          style={{ color: "var(--rak-charcoal)" }}
-        >
-          Login
-        </Link>
+        {user ? (
+          <>
+            <Link
+              to="/dashboard"
+              className="font-medium hover:opacity-70 transition"
+              style={{ color: "var(--rak-charcoal)" }}
+            >
+              Dashboard
+            </Link>
 
-        <Link
-          to="/register"
-          className="px-5 py-2 rounded-xl text-white font-medium transition hover:opacity-90"
-          style={{ backgroundColor: "var(--rak-primary)" }}
-        >
-          Register
-        </Link>
+            <button
+              onClick={handleLogout}
+              className="px-5 py-2 rounded-xl text-white font-medium"
+              style={{
+                backgroundColor: "var(--rak-primary)",
+              }}
+            >
+              Logout
+            </button>
+          </>
+        ) : (
+          <>
+            <Link
+              to="/login"
+              className="font-medium hover:opacity-70 transition"
+              style={{ color: "var(--rak-charcoal)" }}
+            >
+              Login
+            </Link>
+
+            <Link
+              to="/register"
+              className="px-5 py-2 rounded-xl text-white font-medium transition hover:opacity-90"
+              style={{
+                backgroundColor: "var(--rak-primary)",
+              }}
+            >
+              Register
+            </Link>
+          </>
+        )}
       </div>
     </nav>
   );
