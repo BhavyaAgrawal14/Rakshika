@@ -1,16 +1,186 @@
-# React + Vite
+# 🛡️ Rakshika – Women Safety Companion
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A modern women safety platform built using React, Tailwind CSS, Framer Motion, and React Router.
 
-Currently, two official plugins are available:
+Rakshika helps users manage emergency contacts, track SOS events, access important safety resources, and maintain a secure personal safety dashboard.
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Oxc](https://oxc.rs)
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/)
+## 🌐 Live Demo
 
-## React Compiler
+https://rakshika-steel.vercel.app/
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+## ✨ Features
 
-## Expanding the ESLint configuration
+### 🔐 Authentication System
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+* User Registration
+* User Login
+* Protected Routes
+* Persistent Login using Local Storage
+* Logout Functionality
+
+### 👥 Emergency Contact Management
+
+* Add Emergency Contacts
+* View Contact List
+* Delete Contacts
+* Persistent Storage using Local Storage
+* Dynamic Dashboard Statistics
+
+### 🚨 SOS Tracking System
+
+* Trigger SOS Events
+* SOS Event Counter
+* SOS Activity Timeline
+* Persistent Event History
+* Emergency Contact Integration
+
+### 📚 Safety Resources
+
+* Women Helpline Information
+* Emergency Response Numbers
+* Ambulance Services
+* Cyber Crime Helpline
+* Safety Awareness Tips
+
+### 🎨 User Experience
+
+* Responsive Design
+* Dashboard Analytics
+* Framer Motion Animations
+* Clean UI with Tailwind CSS
+* Mobile-Friendly Layout
+
+---
+
+## 🛠️ Tech Stack
+
+### Frontend
+
+* React.js
+* Vite
+* React Router DOM
+* Context API
+
+### Styling
+
+* Tailwind CSS
+* Framer Motion
+* Lucide React Icons
+
+### State Management
+
+* React Hooks
+* Context API
+
+### Storage
+
+* Local Storage
+
+### Deployment
+
+* Vercel
+
+---
+
+## 📂 Project Structure
+
+src/
+
+├── components/
+
+│   ├── Navbar
+
+│   ├── Footer
+
+│   ├── ContactForm
+
+│   ├── FeatureCard
+
+│   └── ProtectedRoute
+
+│
+
+├── pages/
+
+│   ├── Home
+
+│   ├── Login
+
+│   ├── Register
+
+│   ├── Dashboard
+
+│   └── Resources
+
+│
+
+├── context/
+
+│   └── AuthContext
+
+│
+
+└── layouts/
+
+```
+└── MainLayout
+```
+
+---
+
+## 🚀 Installation
+
+Clone the repository:
+
+```bash
+git clone https://github.com/BhavyaAgrawal14/Rakshika.git
+```
+
+Navigate into the project:
+
+```bash
+cd Rakshika
+```
+
+Install dependencies:
+
+```bash
+npm install
+```
+
+Run the development server:
+
+```bash
+npm run dev
+```
+
+Build for production:
+
+```bash
+npm run build
+```
+
+---
+
+## 🔮 Future Scope
+
+* Real-time SOS Alert System
+* Live Location Sharing
+* Backend Integration (Node.js + Express)
+* MongoDB Database
+* Emergency SMS Notifications
+* Push Notifications
+* AI-Based Safety Assistant
+* Nearby Safe Zones & Police Stations
+
+---
+
+## 👩‍💻 Author
+
+**Bhavya Agrawal**
+
+Built as a women safety initiative focused on accessibility, emergency preparedness, and user-centric design.
+
+---
+
+⭐ If you found this project interesting, consider giving it a star.
