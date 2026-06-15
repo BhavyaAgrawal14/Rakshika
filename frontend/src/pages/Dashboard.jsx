@@ -11,11 +11,7 @@ function Dashboard() {
   const navigate = useNavigate();
   const [contacts, setContacts] = useState([]);
   const [showForm, setShowForm] = useState(false);
-  const [sosEvents, setSosEvents] = useState(() => {
-    const savedEvents = localStorage.getItem("sosEvents");
-
-    return savedEvents ? JSON.parse(savedEvents) : [];
-  });
+  const [sosEvents, setSosEvents] = useState([]);
   const fetchContacts = async () => {
     try {
       const response = await API.get("/contacts");
@@ -25,47 +21,45 @@ function Dashboard() {
       console.log(error);
     }
   };
+  const fetchSOSHistory = async () => {
+    try {
+      const response = await API.get("/sos");
+
+      setSosEvents(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
 
   useEffect(() => {
     fetchContacts();
+    fetchSOSHistory();
   }, []);
 
   useEffect(() => {
     localStorage.setItem("contacts", JSON.stringify(contacts));
   }, [contacts]);
 
-  useEffect(() => {
-    localStorage.setItem("sosEvents", JSON.stringify(sosEvents));
-  }, [sosEvents]);
-
   const handleLogout = () => {
     logout();
     navigate("/login");
   };
 
-  const handleAddContact = async (
-  contact
-) => {
-  try {
-    await API.post(
-      "/contacts",
-      contact
-    );
-
-    fetchContacts();
-
-    setShowForm(false);
-  } catch (error) {
-    console.log(error);
-  }
-};
-
-  const handleDeleteContact =
-  async (id) => {
+  const handleAddContact = async (contact) => {
     try {
-      await API.delete(
-        `/contacts/${id}`
-      );
+      await API.post("/contacts", contact);
+
+      fetchContacts();
+
+      setShowForm(false);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  const handleDeleteContact = async (id) => {
+    try {
+      await API.delete(`/contacts/${id}`);
 
       fetchContacts();
     } catch (error) {
@@ -73,13 +67,14 @@ function Dashboard() {
     }
   };
 
-  const handleTriggerSOS = () => {
-    const newEvent = {
-      id: Date.now(),
-      timestamp: new Date().toLocaleString(),
-    };
+  const handleTriggerSOS = async () => {
+    try {
+      await API.post("/sos");
 
-    setSosEvents([...sosEvents, newEvent]);
+      fetchSOSHistory();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   return (
@@ -110,7 +105,7 @@ function Dashboard() {
           </div>
 
           <div>
-            <p className="text-3xl font-bold">0</p>
+            <p className="text-3xl font-bold">{sosEvents.length}</p>
 
             <p className="text-gray-200 text-sm">SOS Events</p>
           </div>
@@ -268,7 +263,7 @@ function Dashboard() {
               .reverse()
               .map((event) => (
                 <motion.div
-                  key={event.id}
+                  key={event._id}
                   initial={{ opacity: 0, x: -20 }}
                   animate={{ opacity: 1, x: 0 }}
                   transition={{ duration: 0.3 }}
@@ -278,7 +273,9 @@ function Dashboard() {
                     Emergency Alert Triggered
                   </h3>
 
-                  <p className="text-gray-500 text-sm">{event.timestamp}</p>
+                  <p className="text-gray-500 text-sm">
+                    {new Date(event.timestamp).toLocaleString()}
+                  </p>
                 </motion.div>
               ))}
           </div>

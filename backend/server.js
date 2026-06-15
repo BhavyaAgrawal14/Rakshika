@@ -8,6 +8,9 @@ const app = express();
 const contactRoutes = require(
   "./routes/contactRoutes"
 );
+const sosRoutes = require(
+  "./routes/sosRoutes"
+);
 connectDB();
 
 app.use(cors());
@@ -16,6 +19,10 @@ app.use("/api/auth", authRoutes);
 app.use(
   "/api/contacts",
   contactRoutes
+);
+app.use(
+  "/api/sos",
+  sosRoutes
 );
 
 app.get("/", (req, res) => {
