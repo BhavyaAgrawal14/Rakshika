@@ -4,21 +4,31 @@ import { useState, useEffect } from "react";
 import ContactForm from "../components/ContactForm";
 import { Users, ShieldAlert, User, Phone, Plus, Trash2 } from "lucide-react";
 import { motion } from "framer-motion";
+import API from "../services/api";
 
 function Dashboard() {
   const { user, logout } = useAuth();
   const navigate = useNavigate();
-  const [contacts, setContacts] = useState(() => {
-    const savedContacts = localStorage.getItem("contacts");
-
-    return savedContacts ? JSON.parse(savedContacts) : [];
-  });
+  const [contacts, setContacts] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [sosEvents, setSosEvents] = useState(() => {
     const savedEvents = localStorage.getItem("sosEvents");
 
     return savedEvents ? JSON.parse(savedEvents) : [];
   });
+  const fetchContacts = async () => {
+    try {
+      const response = await API.get("/contacts");
+
+      setContacts(response.data);
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
+  useEffect(() => {
+    fetchContacts();
+  }, []);
 
   useEffect(() => {
     localStorage.setItem("contacts", JSON.stringify(contacts));
@@ -33,13 +43,34 @@ function Dashboard() {
     navigate("/login");
   };
 
-  const handleAddContact = (contact) => {
-    setContacts([...contacts, contact]);
-    setShowForm(false);
-  };
+  const handleAddContact = async (
+  contact
+) => {
+  try {
+    await API.post(
+      "/contacts",
+      contact
+    );
 
-  const handleDeleteContact = (id) => {
-    setContacts(contacts.filter((contact) => contact.id !== id));
+    fetchContacts();
+
+    setShowForm(false);
+  } catch (error) {
+    console.log(error);
+  }
+};
+
+  const handleDeleteContact =
+  async (id) => {
+    try {
+      await API.delete(
+        `/contacts/${id}`
+      );
+
+      fetchContacts();
+    } catch (error) {
+      console.log(error);
+    }
   };
 
   const handleTriggerSOS = () => {
@@ -157,7 +188,7 @@ function Dashboard() {
           <div className="grid md:grid-cols-2 gap-4">
             {contacts.map((contact) => (
               <motion.div
-                key={contact.id}
+                key={contact._id}
                 initial={{ opacity: 0, scale: 0.95 }}
                 animate={{ opacity: 1, scale: 1 }}
                 transition={{ duration: 0.3 }}
@@ -178,7 +209,7 @@ function Dashboard() {
                 </div>
 
                 <button
-                  onClick={() => handleDeleteContact(contact.id)}
+                  onClick={() => handleDeleteContact(contact._id)}
                   className="p-3 rounded-lg text-white"
                   style={{
                     backgroundColor: "#dc2626",
@@ -216,7 +247,7 @@ function Dashboard() {
             ) : (
               <ul className="space-y-2">
                 {contacts.map((contact) => (
-                  <li key={contact.id} className="text-gray-700">
+                  <li key={contact._id} className="text-gray-700">
                     • {contact.name}
                   </li>
                 ))}

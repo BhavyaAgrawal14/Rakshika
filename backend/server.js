@@ -5,11 +5,18 @@ require("dotenv").config();
 const authRoutes = require("./routes/authRoutes");
 
 const app = express();
+const contactRoutes = require(
+  "./routes/contactRoutes"
+);
 connectDB();
 
 app.use(cors());
 app.use(express.json());
 app.use("/api/auth", authRoutes);
+app.use(
+  "/api/contacts",
+  contactRoutes
+);
 
 app.get("/", (req, res) => {
   res.json({

@@ -1,24 +1,38 @@
 import { useState } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import API from "../services/api";
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const { login } = useAuth();
   const navigate = useNavigate();
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    const userData = {
-      email,
-      name: email.split("@")[0],
-    };
+  try {
+    const response = await API.post(
+      "/auth/login",
+      {
+        email,
+        password,
+      }
+    );
 
-    login(userData);
+    login(
+      response.data.user,
+      response.data.token
+    );
 
     navigate("/dashboard");
-  };
+  } catch (error) {
+    alert(
+      error.response?.data?.message ||
+        "Login failed"
+    );
+  }
+};
 
   return (
     <div className="min-h-screen flex items-center justify-center px-4">

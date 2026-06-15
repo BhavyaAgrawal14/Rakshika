@@ -1,6 +1,6 @@
 import { useState } from "react";
-import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
+import API from "../services/api";
 
 function Register() {
   const [name, setName] = useState("");
@@ -8,27 +8,34 @@ function Register() {
   const [password, setPassword] = useState("");
   const [confirmPassword, setConfirmPassword] = useState("");
   const [error, setError] = useState("");
-  const { login } = useAuth();
   const navigate = useNavigate();
-  const handleSubmit = (e) => {
-    e.preventDefault();
+  const handleSubmit = async (e) => {
+  e.preventDefault();
 
-    setError("");
+  setError("");
 
-    if (password !== confirmPassword) {
-      setError("Passwords do not match");
-      return;
-    }
+  if (password !== confirmPassword) {
+    setError("Passwords do not match");
+    return;
+  }
 
-    const userData = {
+  try {
+    await API.post("/auth/register", {
       name,
       email,
-    };
+      password,
+    });
 
-    login(userData);
+    alert("Registration successful!");
 
-    navigate("/dashboard");
-  };
+    navigate("/login");
+  } catch (error) {
+    setError(
+      error.response?.data?.message ||
+        "Registration failed"
+    );
+  }
+};
   return (
     <div className="min-h-screen flex items-center justify-center px-4">
       <div className="bg-white p-8 rounded-3xl shadow-lg w-full max-w-md">
@@ -83,10 +90,6 @@ function Register() {
             Create Account
           </button>
         </form>
-        <div className="mt-6 text-sm text-gray-500">
-          <p>Name: {name}</p>
-          <p>Email: {email}</p>
-        </div>
       </div>
     </div>
   );
