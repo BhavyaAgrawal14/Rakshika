@@ -15,6 +15,7 @@ import {
   Navigation,
   AlertCircle,
   Info,
+  ShieldCheck,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "../services/api";
@@ -25,6 +26,26 @@ const safetyTips = [
   "Keep your phone charged and easily accessible when out at night.",
   "Be aware of your surroundings and avoid distractions like texting while walking.",
 ];
+
+// Mock Data for Phase 3B: Nearby Emergency Services
+const nearbyServices = {
+  hospitals: [
+    { id: 1, name: "City Hospital", distance: "1.2 km", phone: "108" },
+    { id: 2, name: "Apollo Clinic", distance: "2.8 km", phone: "108" },
+  ],
+  police: [
+    {
+      id: 3,
+      name: "Civil Lines Police Station",
+      distance: "1.7 km",
+      phone: "112",
+    },
+    { id: 4, name: "Women's Help Desk", distance: "2.3 km", phone: "1091" },
+  ],
+  support: [
+    { id: 5, name: "Sakhi One Stop Center", distance: "3.1 km", phone: "181" },
+  ],
+};
 
 // Helper Component for Stat Cards
 const StatCard = ({ title, value, icon, color, delay }) => (
@@ -587,6 +608,123 @@ function Dashboard() {
                   </p>
                 </div>
               )}
+            </div>
+          </motion.div>
+
+          {/* Nearby Emergency Services Widget */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.8 }}
+            className="bg-white/60 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2
+                className="text-xl font-bold"
+                style={{ color: "var(--rak-primary)" }}
+              >
+                Nearby Emergency Services
+              </h2>
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100">
+                Local
+              </span>
+            </div>
+
+            <div className="space-y-6">
+              {/* Hospitals */}
+              <div>
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <Activity size={14} color="#dc2626" /> Hospitals & Clinics
+                </h3>
+                <div className="space-y-3">
+                  {nearbyServices.hospitals.map((service) => (
+                    <div
+                      key={service.id}
+                      className="flex justify-between items-center p-3 rounded-2xl bg-white border border-gray-100 hover:border-red-200 transition-all group"
+                    >
+                      <div>
+                        <p className="font-bold text-sm text-gray-800">
+                          {service.name}
+                        </p>
+                        <p className="text-xs font-medium text-gray-500 mt-0.5">
+                          {service.distance}
+                        </p>
+                      </div>
+                      <a
+                        href={`tel:${service.phone}`}
+                        className="flex items-center justify-center w-8 h-8 rounded-full bg-red-50 text-red-600 hover:bg-red-600 hover:text-white transition-colors"
+                      >
+                        <Phone size={14} />
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Police */}
+              <div>
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <ShieldCheck size={14} color="var(--rak-secondary)" /> Police
+                  Stations
+                </h3>
+                <div className="space-y-3">
+                  {nearbyServices.police.map((service) => (
+                    <div
+                      key={service.id}
+                      className="flex justify-between items-center p-3 rounded-2xl bg-white border border-gray-100 hover:border-[#6A1B4D] transition-all group"
+                    >
+                      <div>
+                        <p className="font-bold text-sm text-gray-800">
+                          {service.name}
+                        </p>
+                        <p className="text-xs font-medium text-gray-500 mt-0.5">
+                          {service.distance}
+                        </p>
+                      </div>
+                      <a
+                        href={`tel:${service.phone}`}
+                        className="flex items-center justify-center w-8 h-8 rounded-full bg-[rgba(106,27,77,0.1)] text-[#6A1B4D] hover:bg-[#6A1B4D] hover:text-white transition-colors"
+                      >
+                        <Phone size={14} />
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
+
+              {/* Support Centers */}
+              <div>
+                <h3 className="text-xs font-bold text-gray-500 uppercase tracking-wider mb-3 flex items-center gap-2">
+                  <Users size={14} color="var(--rak-gold)" /> Women Support
+                </h3>
+                <div className="space-y-3">
+                  {nearbyServices.support.map((service) => (
+                    <div
+                      key={service.id}
+                      className="flex justify-between items-center p-3 rounded-2xl bg-white border border-gray-100 hover:border-yellow-400 transition-all group"
+                    >
+                      <div>
+                        <p className="font-bold text-sm text-gray-800">
+                          {service.name}
+                        </p>
+                        <p className="text-xs font-medium text-gray-500 mt-0.5">
+                          {service.distance}
+                        </p>
+                      </div>
+                      <a
+                        href={`tel:${service.phone}`}
+                        className="flex items-center justify-center w-8 h-8 rounded-full hover:text-white transition-colors"
+                        style={{
+                          backgroundColor: "rgba(212,175,55,0.1)",
+                          color: "var(--rak-gold)",
+                        }}
+                      >
+                        <Phone size={14} />
+                      </a>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </div>
           </motion.div>
 
