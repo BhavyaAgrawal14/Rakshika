@@ -1,14 +1,26 @@
 @import "tailwindcss";
 
 :root {
-  --rak-primary: #4A102A;
-  --rak-secondary: #7C1D3D;
-  --rak-gold: #D6B370;
-  --rak-ivory: #FAF7F2;
-  --rak-charcoal: #2B2B2B;
+  /* Premium Color System */
+  --rak-primary: #4A0E2E;
+  --rak-secondary: #6A1B4D;
+  --rak-gold: #D4AF37;
+  --rak-background: #F8F6F4;
+  --rak-text: #1F1F1F;
+  
+  /* Legacy Mappings to ensure other components don't break */
+  --rak-ivory: #F8F6F4;
+  --rak-charcoal: #1F1F1F;
 }
 
 body {
-  background-color: var(--rak-ivory);
-  color: var(--rak-charcoal);
+  background-color: var(--rak-background);
+  color: var(--rak-text);
+  font-family: "Inter", -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+html {
+  scroll-behavior: smooth;
 }
