@@ -25,7 +25,7 @@ function Login() {
       response.data.token
     );
 
-    navigate("/dashboard");
+    navigate("/");
   } catch (error) {
     alert(
       error.response?.data?.message ||

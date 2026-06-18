@@ -3,10 +3,13 @@ import FeatureCard from "../components/FeatureCard";
 import SOSButton from "../components/SOSButton";
 import TrustSection from "../components/TrustSection";
 import { motion } from "framer-motion";
+import { Link } from "react-router-dom";
+import { useAuth } from "../context/AuthContext";
 
 import { Users, ShieldAlert, BookOpen } from "lucide-react";
 
 function Home() {
+  const { user } = useAuth();
   return (
     <MainLayout>
       <div className="p-8">
@@ -21,7 +24,9 @@ function Home() {
           </p>
 
           <h1 className="text-5xl md:text-6xl font-bold mb-6">
-            Protection At Every Step
+            {user
+              ? `Welcome Back, ${user.name} 👋`
+              : "Protection At Every Step"}
           </h1>
 
           <p className="text-lg text-gray-600 max-w-2xl mx-auto mb-8">
@@ -30,11 +35,36 @@ function Home() {
           </p>
 
           <div className="flex justify-center gap-4">
-            <button className="bg-black text-white px-6 py-3 rounded-xl">
-              Get Started
-            </button>
+            {user ? (
+              <>
+                <Link
+                  to="/dashboard"
+                  className="bg-black text-white px-6 py-3 rounded-xl"
+                >
+                  Open Dashboard
+                </Link>
 
-            <button className="border px-6 py-3 rounded-xl">Learn More</button>
+                <Link to="/profile" className="border px-6 py-3 rounded-xl">
+                  Manage Profile
+                </Link>
+
+                <Link to="/resources" className="border px-6 py-3 rounded-xl">
+                  Safety Resources
+                </Link>
+              </>
+            ) : (
+              <>
+                <Link
+                  to="/register"
+                  className="bg-black text-white px-6 py-3 rounded-xl"
+                >
+                  Get Started
+                </Link>
+                <Link to="/resources" className="border px-6 py-3 rounded-xl">
+                  Learn More
+                </Link>
+              </>
+            )}
           </div>
         </motion.div>
 

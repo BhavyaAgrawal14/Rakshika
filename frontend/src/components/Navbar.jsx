@@ -8,7 +8,7 @@ function Navbar() {
 
   const handleLogout = () => {
     logout();
-    navigate("/login");
+    navigate("/");
   };
   return (
     <nav
@@ -27,7 +27,7 @@ function Navbar() {
         </span>
       </div>
 
-      <div className="hidden md:flex gap-8">
+      <div className="hidden md:flex gap-8 items-center">
         <Link
           to="/"
           className="font-medium hover:opacity-70 transition"
@@ -43,10 +43,8 @@ function Navbar() {
         >
           Resources
         </Link>
-      </div>
 
-      <div className="flex gap-4 items-center">
-        {user ? (
+        {user && (
           <>
             <Link
               to="/dashboard"
@@ -55,17 +53,45 @@ function Navbar() {
             >
               Dashboard
             </Link>
-
-            <button
-              onClick={handleLogout}
-              className="px-5 py-2 rounded-xl text-white font-medium"
-              style={{
-                backgroundColor: "var(--rak-primary)",
-              }}
+            <Link
+              to="/profile"
+              className="font-medium hover:opacity-70 transition"
+              style={{ color: "var(--rak-charcoal)" }}
             >
-              Logout
-            </button>
+              Profile
+            </Link>
+            <Link
+              to="/settings"
+              className="font-medium hover:opacity-70 transition"
+              style={{ color: "var(--rak-charcoal)" }}
+            >
+              Settings
+            </Link>
           </>
+        )}
+      </div>
+
+      <div className="flex gap-4 items-center">
+        {user && (
+          <span
+            className="font-medium"
+            style={{
+              color: "var(--rak-charcoal)",
+            }}
+          >
+            {user.name}
+          </span>
+        )}
+        {user ? (
+          <button
+            onClick={handleLogout}
+            className="px-5 py-2 rounded-xl text-white font-medium"
+            style={{
+              backgroundColor: "var(--rak-primary)",
+            }}
+          >
+            Logout
+          </button>
         ) : (
           <>
             <Link

@@ -9,6 +9,7 @@ import SOSHistory from "./pages/SOSHistory";
 import Resources from "./pages/Resources";
 import Profile from "./pages/Profile";
 import ProtectedRoute from "./components/ProtectedRoute";
+import Settings from "./pages/Settings";
 
 function App() {
   return (
@@ -25,10 +26,39 @@ function App() {
             </ProtectedRoute>
           }
         />
-        <Route path="/contacts" element={<Contacts />} />
-        <Route path="/history" element={<SOSHistory />} />
+        <Route
+          path="/contacts"
+          element={
+            <ProtectedRoute>
+              <Contacts />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/history"
+          element={
+            <ProtectedRoute>
+              <SOSHistory />
+            </ProtectedRoute>
+          }
+        />
         <Route path="/resources" element={<Resources />} />
-        <Route path="/profile" element={<Profile />} />
+        <Route
+          path="/profile"
+          element={
+            <ProtectedRoute>
+              <Profile />
+            </ProtectedRoute>
+          }
+        />
+        <Route
+          path="/settings"
+          element={
+            <ProtectedRoute>
+              <Settings />
+            </ProtectedRoute>
+          }
+        />
       </Routes>
     </BrowserRouter>
   );
