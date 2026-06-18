@@ -1,30 +1,78 @@
+import React, { useState, useEffect } from "react";
 import { useAuth } from "../context/AuthContext";
 import { useNavigate } from "react-router-dom";
-import { useState, useEffect } from "react";
 import ContactForm from "../components/ContactForm";
-import { Users, ShieldAlert, User, Phone, Plus, Trash2 } from "lucide-react";
-import { motion } from "framer-motion";
+import {
+  Users,
+  ShieldAlert,
+  User,
+  Phone,
+  Plus,
+  Trash2,
+  MapPin,
+  Activity,
+  Clock,
+  Navigation,
+  AlertCircle,
+  Info,
+} from "lucide-react";
+import { motion, AnimatePresence } from "framer-motion";
 import API from "../services/api";
 
+const safetyTips = [
+  "Share your live location with trusted contacts when traveling alone.",
+  "Trust your instincts. If a situation feels unsafe, leave immediately.",
+  "Keep your phone charged and easily accessible when out at night.",
+  "Be aware of your surroundings and avoid distractions like texting while walking.",
+];
+
+// Helper Component for Stat Cards
+const StatCard = ({ title, value, icon, color, delay }) => (
+  <motion.div
+    initial={{ opacity: 0, y: 20 }}
+    animate={{ opacity: 1, y: 0 }}
+    transition={{ delay, duration: 0.5 }}
+    className="bg-white/80 backdrop-blur-xl border border-white/50 rounded-3xl p-5 shadow-sm hover:shadow-md transition-all flex items-center gap-4 group"
+  >
+    <div
+      className="w-12 h-12 rounded-2xl flex items-center justify-center transition-transform group-hover:scale-110 shadow-inner shrink-0"
+      style={{ backgroundColor: `${color}15` }}
+    >
+      {React.cloneElement(icon, { color: color })}
+    </div>
+    <div>
+      <p className="text-[10px] font-bold uppercase tracking-wider text-gray-500 mb-0.5">
+        {title}
+      </p>
+      <p
+        className="text-2xl font-black"
+        style={{ color: "var(--rak-primary)" }}
+      >
+        {value}
+      </p>
+    </div>
+  </motion.div>
+);
+
 function Dashboard() {
-  const { user, logout } = useAuth();
-  const navigate = useNavigate();
+  const { user } = useAuth();
   const [contacts, setContacts] = useState([]);
   const [showForm, setShowForm] = useState(false);
   const [sosEvents, setSosEvents] = useState([]);
+  const [currentTip, setCurrentTip] = useState(0);
+
   const fetchContacts = async () => {
     try {
       const response = await API.get("/contacts");
-
       setContacts(response.data);
     } catch (error) {
       console.log(error);
     }
   };
+
   const fetchSOSHistory = async () => {
     try {
       const response = await API.get("/sos");
-
       setSosEvents(response.data);
     } catch (error) {
       console.log(error);
@@ -40,17 +88,17 @@ function Dashboard() {
     localStorage.setItem("contacts", JSON.stringify(contacts));
   }, [contacts]);
 
-  const handleLogout = () => {
-    logout();
-    navigate("/login");
-  };
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTip((prev) => (prev + 1) % safetyTips.length);
+    }, 6000);
+    return () => clearInterval(interval);
+  }, []);
 
   const handleAddContact = async (contact) => {
     try {
       await API.post("/contacts", contact);
-
       fetchContacts();
-
       setShowForm(false);
     } catch (error) {
       console.log(error);
@@ -60,7 +108,6 @@ function Dashboard() {
   const handleDeleteContact = async (id) => {
     try {
       await API.delete(`/contacts/${id}`);
-
       fetchContacts();
     } catch (error) {
       console.log(error);
@@ -70,216 +117,431 @@ function Dashboard() {
   const handleTriggerSOS = async () => {
     try {
       await API.post("/sos");
-
       fetchSOSHistory();
+      alert("SOS Triggered Successfully! Alerts sent.");
     } catch (error) {
       console.log(error);
+      alert("Failed to trigger SOS.");
     }
   };
 
   return (
-    <div className="max-w-7xl mx-auto p-8">
+    <div className="max-w-7xl mx-auto p-6 md:p-10 pt-6">
+      {/* 1. Welcome Header */}
       <motion.div
-        initial={{ opacity: 0, y: -30 }}
+        initial={{ opacity: 0, y: -20 }}
         animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="rounded-3xl p-8 text-white mb-8"
-        style={{
-          backgroundColor: "var(--rak-primary)",
-        }}
+        className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-4"
       >
-        <h1 className="text-4xl font-bold mb-3">
-          Welcome Back, {user?.name} 👋
-        </h1>
-
-        <p className="text-gray-200">
-          Stay connected, stay protected. Manage your safety network from one
-          place.
-        </p>
-
-        <div className="mt-4 flex gap-6">
-          <div>
-            <p className="text-3xl font-bold">{contacts.length}</p>
-
-            <p className="text-gray-200 text-sm">Emergency Contacts</p>
-          </div>
-
-          <div>
-            <p className="text-3xl font-bold">{sosEvents.length}</p>
-
-            <p className="text-gray-200 text-sm">SOS Events</p>
-          </div>
+        <div>
+          <h1
+            className="text-4xl md:text-5xl font-black tracking-tight"
+            style={{
+              color: "var(--rak-primary)",
+            }}
+          >
+            Welcome back, {user?.name}
+          </h1>
+          <p className="text-gray-500 font-medium mt-2 flex items-center gap-2">
+            <Clock size={16} />
+            {new Date().toLocaleDateString("en-US", {
+              weekday: "long",
+              year: "numeric",
+              month: "long",
+              day: "numeric",
+            })}
+          </p>
         </div>
-
-        <button
-          onClick={handleLogout}
-          className="mt-6 bg-white text-black px-5 py-2 rounded-xl font-medium"
-        >
-          Logout
-        </button>
+        <div className="flex items-center gap-3 bg-white/80 backdrop-blur-md border border-white p-2 pr-5 rounded-full shadow-sm">
+          <div className="w-8 h-8 rounded-full bg-green-100 flex items-center justify-center">
+            <div className="w-3 h-3 rounded-full bg-green-500 animate-pulse"></div>
+          </div>
+          <span className="font-bold text-sm tracking-wide text-green-700">
+            System Protected
+          </span>
+        </div>
       </motion.div>
 
-      <div className="grid md:grid-cols-2 gap-6">
-        <motion.div
-          initial={{ opacity: 0, y: 30 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.5 }}
-          className="bg-white rounded-3xl p-6 shadow"
-        >
-          <div className="flex items-center gap-2 mb-2">
-            <Users size={22} color="#7C1D3D" />
-
-            <h3 className="text-gray-500">Emergency Contacts</h3>
-          </div>
-
-          <p className="text-4xl font-bold">{contacts.length}</p>
-
-          <p className="text-sm text-gray-500 mt-2">Contacts added</p>
-        </motion.div>
-
-        <div className="bg-white rounded-3xl p-6 shadow">
-          <div className="flex items-center gap-2 mb-2">
-            <ShieldAlert size={22} color="#7C1D3D" />
-
-            <h3 className="text-gray-500">SOS Events</h3>
-          </div>
-
-          <p className="text-4xl font-bold">{sosEvents.length}</p>
-
-          <p className="text-sm text-gray-500 mt-2">Recorded events</p>
-        </div>
+      {/* 2. Statistics Grid */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-5 mb-10">
+        <StatCard
+          title="Contacts"
+          value={contacts.length}
+          icon={<Users size={24} />}
+          color="var(--rak-primary)"
+          delay={0.1}
+        />
+        <StatCard
+          title="SOS Events"
+          value={sosEvents.length}
+          icon={<ShieldAlert size={24} />}
+          color="#dc2626"
+          delay={0.2}
+        />
+        <StatCard
+          title="Safety Score"
+          value={
+            contacts.length === 0 ? "65%" : contacts.length < 3 ? "82%" : "98%"
+          }
+          icon={<Activity size={24} />}
+          color="var(--rak-gold)"
+          delay={0.3}
+        />
+        <StatCard
+          title="Last Active"
+          value="Home"
+          icon={<MapPin size={24} />}
+          color="var(--rak-secondary)"
+          delay={0.4}
+        />
       </div>
-      <div className="bg-white rounded-3xl p-6 shadow mt-8">
-        <div className="flex justify-between items-center mb-6">
-          <h2 className="text-2xl font-bold">Emergency Contacts</h2>
 
-          <button
-            onClick={() => setShowForm(!showForm)}
-            className="px-4 py-2 rounded-xl text-white flex items-center gap-2"
-            style={{
-              backgroundColor: "var(--rak-primary)",
-            }}
+      {/* Main Content Layout */}
+      <div className="grid lg:grid-cols-3 gap-8">
+        {/* Left Column - Actions & Timeline */}
+        <div className="lg:col-span-2 space-y-8">
+          {/* 4. Quick Actions Panel */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+            className="bg-white/60 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow"
           >
-            <>
-              <Plus size={18} />
-              Add Contact
-            </>
-          </button>
-        </div>
-
-        {showForm && <ContactForm onAddContact={handleAddContact} />}
-
-        {contacts.length === 0 ? (
-          <div className="text-center py-12">
-            <p className="text-gray-500 text-lg">
-              No emergency contacts added yet.
-            </p>
-
-            <p className="text-gray-400 mt-2">
-              Add trusted contacts to quickly reach them during emergencies.
-            </p>
-          </div>
-        ) : (
-          <div className="grid md:grid-cols-2 gap-4">
-            {contacts.map((contact) => (
-              <motion.div
-                key={contact._id}
-                initial={{ opacity: 0, scale: 0.95 }}
-                animate={{ opacity: 1, scale: 1 }}
-                transition={{ duration: 0.3 }}
-                className="border rounded-2xl p-5 flex justify-between items-center hover:shadow-md transition"
+            <div className="flex items-center gap-3 mb-6">
+              <div
+                className="w-2 h-8 rounded-full"
+                style={{
+                  backgroundColor: "var(--rak-gold)",
+                }}
+              />
+              <h2
+                className="text-xl font-bold"
+                style={{
+                  color: "var(--rak-primary)",
+                }}
               >
-                <div>
-                  <div className="flex items-center gap-2 mb-2">
-                    <User size={18} color="#7C1D3D" />
-
-                    <h3 className="font-semibold text-lg">{contact.name}</h3>
-                  </div>
-
-                  <div className="flex items-center gap-2">
-                    <Phone size={16} color="#6b7280" />
-
-                    <p className="text-gray-500">{contact.phone}</p>
-                  </div>
+                Quick Actions
+              </h2>
+            </div>
+            <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+              <button
+                onClick={handleTriggerSOS}
+                className="flex flex-col items-center justify-center gap-3 p-5 rounded-2xl bg-red-50 hover:bg-red-100 border border-red-100 transition-colors group shadow-sm"
+              >
+                <div className="w-14 h-14 rounded-full bg-red-100 flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner">
+                  <ShieldAlert color="#dc2626" size={28} />
                 </div>
+                <span className="text-sm font-bold text-red-700 tracking-wide">
+                  Trigger SOS
+                </span>
+              </button>
 
-                <button
-                  onClick={() => handleDeleteContact(contact._id)}
-                  className="p-3 rounded-lg text-white"
-                  style={{
-                    backgroundColor: "#dc2626",
-                  }}
+              <button
+                onClick={() => setShowForm(!showForm)}
+                className="flex flex-col items-center justify-center gap-3 p-5 rounded-2xl bg-white hover:bg-gray-50 border border-gray-100 transition-all group shadow-sm"
+              >
+                <div
+                  className="w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner"
+                  style={{ backgroundColor: "rgba(74, 14, 46, 0.05)" }}
                 >
-                  <Trash2 size={18} />
-                </button>
-              </motion.div>
-            ))}
-          </div>
-        )}
-      </div>
-      <div className="bg-white rounded-3xl p-6 shadow mt-8">
-        <div className="flex justify-between items-center">
-          <div>
-            <h2 className="text-2xl font-bold">SOS Center</h2>
+                  <Plus color="var(--rak-primary)" size={28} />
+                </div>
+                <span className="text-sm font-bold text-gray-800 tracking-wide text-center leading-tight">
+                  Add
+                  <br />
+                  Contact
+                </span>
+              </button>
 
-            <p className="text-gray-500">Trigger an emergency alert event.</p>
-          </div>
+              <button className="flex flex-col items-center justify-center gap-3 p-5 rounded-2xl bg-white hover:bg-gray-50 border border-gray-100 transition-all group shadow-sm">
+                <div
+                  className="w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner"
+                  style={{ backgroundColor: "rgba(212, 175, 55, 0.1)" }}
+                >
+                  <Navigation color="var(--rak-gold)" size={28} />
+                </div>
+                <span className="text-sm font-bold text-gray-800 tracking-wide text-center leading-tight">
+                  Live
+                  <br />
+                  Location
+                </span>
+              </button>
 
-          <button
-            onClick={handleTriggerSOS}
-            className="px-6 py-3 rounded-xl text-white font-semibold"
-            style={{
-              backgroundColor: "#dc2626",
-            }}
+              <button className="flex flex-col items-center justify-center gap-3 p-5 rounded-2xl bg-white hover:bg-gray-50 border border-gray-100 transition-all group shadow-sm">
+                <div
+                  className="w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner"
+                  style={{ backgroundColor: "rgba(106, 27, 77, 0.05)" }}
+                >
+                  <Phone color="var(--rak-secondary)" size={28} />
+                </div>
+                <span className="text-sm font-bold text-gray-800 tracking-wide text-center leading-tight">
+                  Nearby
+                  <br />
+                  Helplines
+                </span>
+              </button>
+            </div>
+          </motion.div>
+
+          {/* Safety Network (Contacts list & Add Form) */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+            className="bg-white/60 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow"
           >
-            🚨 Trigger SOS
-          </button>
-          <div className="mt-6 border-t pt-4">
-            <h3 className="font-semibold mb-3">Alert Recipients</h3>
+            <div className="flex justify-between items-center mb-6">
+              <div>
+                <h2
+                  className="text-xl font-bold"
+                  style={{ color: "var(--rak-primary)" }}
+                >
+                  Safety Network
+                </h2>
+                <p className="text-sm text-gray-500 font-medium">
+                  Your trusted emergency contacts
+                </p>
+              </div>
+            </div>
+
+            {showForm && (
+              <div className="mb-6 p-5 border border-gray-200 rounded-2xl bg-white shadow-sm">
+                <div className="flex justify-between items-center mb-4">
+                  <h3 className="font-bold text-var(--rak-primary)">
+                    Add New Contact
+                  </h3>
+                  <button
+                    onClick={() => setShowForm(false)}
+                    className="text-gray-400 hover:text-gray-600 font-medium text-sm"
+                  >
+                    Cancel
+                  </button>
+                </div>
+                <ContactForm onAddContact={handleAddContact} />
+              </div>
+            )}
 
             {contacts.length === 0 ? (
-              <p className="text-gray-500">No emergency contacts available.</p>
-            ) : (
-              <ul className="space-y-2">
-                {contacts.map((contact) => (
-                  <li key={contact._id} className="text-gray-700">
-                    • {contact.name}
-                  </li>
-                ))}
-              </ul>
-            )}
-          </div>
-        </div>
-      </div>
-      <div className="bg-white rounded-3xl p-6 shadow mt-8">
-        <h2 className="text-2xl font-bold mb-6">Recent SOS Activity</h2>
-
-        {sosEvents.length === 0 ? (
-          <p className="text-gray-500">No SOS events recorded yet.</p>
-        ) : (
-          <div className="space-y-4">
-            {sosEvents
-              .slice()
-              .reverse()
-              .map((event) => (
-                <motion.div
-                  key={event._id}
-                  initial={{ opacity: 0, x: -20 }}
-                  animate={{ opacity: 1, x: 0 }}
-                  transition={{ duration: 0.3 }}
-                  className="border-l-4 border-red-500 pl-4 py-2"
+              <div className="text-center py-10 bg-white/50 rounded-2xl border border-dashed border-gray-300">
+                <Users size={32} className="mx-auto text-gray-400 mb-3" />
+                <p className="text-gray-600 text-sm font-medium">
+                  No contacts added yet.
+                </p>
+                <button
+                  onClick={() => setShowForm(true)}
+                  className="mt-3 text-sm font-bold text-var(--rak-primary)hover:underline"
                 >
-                  <h3 className="font-semibold text-red-600">
-                    Emergency Alert Triggered
-                  </h3>
+                  Add your first contact
+                </button>
+              </div>
+            ) : (
+              <div className="grid md:grid-cols-2 gap-4">
+                {contacts.map((contact) => (
+                  <div
+                    key={contact._id}
+                    className="bg-white border border-gray-100 rounded-2xl p-4 flex justify-between items-center hover:shadow-md hover:border-gray-200 transition-all group"
+                  >
+                    <div className="flex items-center gap-4">
+                      <div
+                        className="w-10 h-10 rounded-full flex items-center justify-center"
+                        style={{ backgroundColor: "rgba(106, 27, 77, 0.08)" }}
+                      >
+                        <User size={18} color="var(--rak-secondary)" />
+                      </div>
+                      <div>
+                        <h3
+                          className="font-bold text-sm"
+                          style={{ color: "var(--rak-primary)" }}
+                        >
+                          {contact.name}
+                        </h3>
+                        <p className="text-xs text-gray-500 font-medium flex items-center gap-1 mt-0.5">
+                          <Phone size={10} /> {contact.phone}
+                        </p>
+                      </div>
+                    </div>
+                    <button
+                      onClick={() => handleDeleteContact(contact._id)}
+                      className="w-8 h-8 rounded-full flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                    >
+                      <Trash2 size={16} />
+                    </button>
+                  </div>
+                ))}
+              </div>
+            )}
+          </motion.div>
 
-                  <p className="text-gray-500 text-sm">
-                    {new Date(event.timestamp).toLocaleString()}
-                  </p>
-                </motion.div>
+          {/* 3. Recent Activity Timeline */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.7 }}
+            className="bg-white/60 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow"
+          >
+            <div className="flex justify-between items-center mb-8">
+              <h2
+                className="text-xl font-bold"
+                style={{ color: "var(--rak-primary)" }}
+              >
+                Recent Activity
+              </h2>
+              <span className="text-xs font-bold text-gray-400 uppercase tracking-wider bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100">
+                Timeline
+              </span>
+            </div>
+
+            <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-linear-to-b before:from-gray-200 before:to-transparent">
+              {sosEvents
+                .slice()
+                .reverse()
+                .slice(0, 4)
+                .map((event, idx) => (
+                  <div
+                    key={event._id || idx}
+                    className="relative flex items-start gap-6 group"
+                  >
+                    <div className="w-10 h-10 rounded-full border-4 border-white bg-red-500 shadow-sm flex items-center justify-center shrink-0 z-10 group-hover:scale-110 transition-transform">
+                      <AlertCircle size={16} color="white" />
+                    </div>
+                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex-1 hover:shadow-md transition-all">
+                      <div className="flex justify-between items-start mb-1">
+                        <h3 className="font-bold text-sm text-red-600">
+                          SOS Alert Triggered
+                        </h3>
+                        <span className="text-xs text-gray-500 font-bold whitespace-nowrap bg-gray-50 px-2 py-1 rounded-md">
+                          {new Date(event.timestamp).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
+                        </span>
+                      </div>
+                      <p className="text-xs text-gray-500 font-medium">
+                        {new Date(event.timestamp).toLocaleDateString()}
+                      </p>
+                    </div>
+                  </div>
+                ))}
+              {sosEvents.length === 0 && (
+                <div className="relative z-10 pl-16">
+                  <div className="bg-white/80 p-4 rounded-2xl border border-dashed border-gray-200">
+                    <p className="text-gray-500 font-medium text-sm">
+                      No recent emergency alerts.
+                    </p>
+                  </div>
+                </div>
+              )}
+            </div>
+          </motion.div>
+        </div>
+
+        {/* Right Column - Widgets */}
+        <div className="space-y-8">
+          {/* 5. Safety Tips Widget */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.8 }}
+            className="rounded-3xl p-8 shadow-lg text-white relative overflow-hidden group"
+            style={{
+              background:
+                "linear-gradient(135deg, var(--rak-primary) 0%, var(--rak-secondary) 100%)",
+            }}
+          >
+            <div className="absolute -top-10 -right-10 opacity-10 group-hover:scale-110 group-hover:rotate-12 transition-transform duration-700">
+              <Info size={160} />
+            </div>
+            <div className="relative z-10">
+              <div className="flex items-center gap-3 mb-6">
+                <div className="p-2.5 bg-white/10 backdrop-blur-sm rounded-xl border border-white/20">
+                  <ShieldAlert size={20} color="var(--rak-gold)" />
+                </div>
+                <h2 className="font-bold text-lg tracking-wide">Safety Tip</h2>
+              </div>
+              <div className="min-h-25">
+                <AnimatePresence mode="wait">
+                  <motion.p
+                    key={currentTip}
+                    initial={{ opacity: 0, y: 10 }}
+                    animate={{ opacity: 1, y: 0 }}
+                    exit={{ opacity: 0, y: -10 }}
+                    transition={{ duration: 0.4 }}
+                    className="text-white/90 font-medium leading-relaxed text-lg"
+                  >
+                    "{safetyTips[currentTip]}"
+                  </motion.p>
+                </AnimatePresence>
+              </div>
+              <div className="flex gap-1.5 mt-6">
+                {safetyTips.map((_, i) => (
+                  <div
+                    key={i}
+                    className={`h-1.5 rounded-full transition-all duration-500 ${i === currentTip ? "w-6 bg-var(--rak-gold)" : "w-2 bg-white/30"}`}
+                  />
+                ))}
+              </div>
+            </div>
+          </motion.div>
+
+          {/* 6. Emergency Helplines Widget */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.9 }}
+            className="bg-white/60 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow"
+          >
+            <h2
+              className="text-xl font-bold mb-6"
+              style={{ color: "var(--rak-primary)" }}
+            >
+              Emergency Helplines
+            </h2>
+            <div className="space-y-3">
+              {[
+                {
+                  name: "Women Helpline",
+                  number: "181",
+                  color: "var(--rak-primary)",
+                },
+                { name: "Emergency Response", number: "112", color: "#dc2626" },
+                {
+                  name: "Women in Distress",
+                  number: "1091",
+                  color: "var(--rak-secondary)",
+                },
+                { name: "Ambulance", number: "108", color: "var(--rak-gold)" },
+              ].map((line, idx) => (
+                <a
+                  key={idx}
+                  href={`tel:${line.number}`}
+                  className="flex items-center justify-between p-4 rounded-2xl bg-white border border-gray-100 hover:border-gray-200 hover:shadow-sm transition-all group"
+                >
+                  <div className="flex items-center gap-4">
+                    <div
+                      className="w-10 h-10 rounded-full flex items-center justify-center transition-colors"
+                      style={{ backgroundColor: `${line.color}15` }}
+                    >
+                      <Phone
+                        size={16}
+                        color={line.color}
+                        className="group-hover:scale-110 transition-transform"
+                      />
+                    </div>
+                    <span className="font-bold text-sm text-gray-800">
+                      {line.name}
+                    </span>
+                  </div>
+                  <span
+                    className="font-black text-lg tracking-wider"
+                    style={{ color: line.color }}
+                  >
+                    {line.number}
+                  </span>
+                </a>
               ))}
-          </div>
-        )}
+            </div>
+          </motion.div>
+        </div>
       </div>
     </div>
   );
