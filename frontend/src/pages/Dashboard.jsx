@@ -60,6 +60,9 @@ function Dashboard() {
   const [showForm, setShowForm] = useState(false);
   const [sosEvents, setSosEvents] = useState([]);
   const [currentTip, setCurrentTip] = useState(0);
+  const [location, setLocation] = useState(null);
+  const [locationLoading, setLocationLoading] = useState(false);
+  const [locationError, setLocationError] = useState("");
 
   const fetchContacts = async () => {
     try {
@@ -123,6 +126,44 @@ function Dashboard() {
       console.log(error);
       alert("Failed to trigger SOS.");
     }
+  };
+
+  const handleGetLocation = () => {
+    setLocationError("");
+
+    if (!navigator.geolocation) {
+      setLocationError("Geolocation is not supported by your browser.");
+      return;
+    }
+
+    setLocationLoading(true);
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        setLocation({
+          latitude: position.coords.latitude,
+          longitude: position.coords.longitude,
+        });
+        setLocationLoading(false);
+      },
+      (error) => {
+        setLocationLoading(false);
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            setLocationError("Permission to access location was denied.");
+            break;
+          case error.POSITION_UNAVAILABLE:
+            setLocationError("Location information is unavailable.");
+            break;
+          case error.TIMEOUT:
+            setLocationError("The request to get location timed out.");
+            break;
+          default:
+            setLocationError("An unknown error occurred.");
+            break;
+        }
+      },
+    );
   };
 
   return (
@@ -189,7 +230,7 @@ function Dashboard() {
         />
         <StatCard
           title="Last Active"
-          value="Home"
+          value={location ? "Live" : "Offline"}
           icon={<MapPin size={24} />}
           color="var(--rak-secondary)"
           delay={0.4}
@@ -253,12 +294,25 @@ function Dashboard() {
                 </span>
               </button>
 
-              <button className="flex flex-col items-center justify-center gap-3 p-5 rounded-2xl bg-white hover:bg-gray-50 border border-gray-100 transition-all group shadow-sm">
+              <button
+                onClick={handleGetLocation}
+                className="flex flex-col items-center justify-center gap-3 p-5 rounded-2xl bg-white hover:bg-gray-50 border border-gray-100 transition-all group shadow-sm"
+              >
                 <div
                   className="w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner"
                   style={{ backgroundColor: "rgba(212, 175, 55, 0.1)" }}
                 >
-                  <Navigation color="var(--rak-gold)" size={28} />
+                  {locationLoading ? (
+                    <div
+                      className="w-6 h-6 border-2 border-t-transparent rounded-full animate-spin"
+                      style={{
+                        borderColor: "var(--rak-gold)",
+                        borderTopColor: "transparent",
+                      }}
+                    ></div>
+                  ) : (
+                    <Navigation color="var(--rak-gold)" size={28} />
+                  )}
                 </div>
                 <span className="text-sm font-bold text-gray-800 tracking-wide text-center leading-tight">
                   Live
@@ -307,7 +361,12 @@ function Dashboard() {
             {showForm && (
               <div className="mb-6 p-5 border border-gray-200 rounded-2xl bg-white shadow-sm">
                 <div className="flex justify-between items-center mb-4">
-                  <h3 className="font-bold text-var(--rak-primary)">
+                  <h3
+                    className="font-bold"
+                    style={{
+                      color: "var(--rak-primary)",
+                    }}
+                  >
                     Add New Contact
                   </h3>
                   <button
@@ -329,7 +388,10 @@ function Dashboard() {
                 </p>
                 <button
                   onClick={() => setShowForm(true)}
-                  className="mt-3 text-sm font-bold text-var(--rak-primary)hover:underline"
+                  className="mt-3 text-sm font-bold hover:underline"
+                  style={{
+                    color: "var(--rak-primary)",
+                  }}
                 >
                   Add your first contact
                 </button>
@@ -437,6 +499,97 @@ function Dashboard() {
 
         {/* Right Column - Widgets */}
         <div className="space-y-8">
+          {/* Current Location Widget */}
+          <motion.div
+            initial={{ opacity: 0, x: 20 }}
+            animate={{ opacity: 1, x: 0 }}
+            transition={{ delay: 0.75 }}
+            className="bg-white/60 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow"
+          >
+            <div className="flex items-center justify-between mb-6">
+              <h2
+                className="text-xl font-bold"
+                style={{ color: "var(--rak-primary)" }}
+              >
+                Current Location
+              </h2>
+              <div className="p-2 rounded-xl bg-white shadow-sm border border-gray-100">
+                <MapPin size={18} color="var(--rak-gold)" />
+              </div>
+            </div>
+
+            <div className="p-5 rounded-2xl bg-white border border-gray-100 shadow-sm relative overflow-hidden">
+              {locationLoading ? (
+                <div className="flex flex-col items-center justify-center py-6 gap-3">
+                  <div
+                    className="w-8 h-8 border-4 border-gray-100 rounded-full animate-spin"
+                    style={{
+                      borderTopColor: "var(--rak-primary)",
+                    }}
+                  ></div>
+                  <p className="text-sm font-semibold text-gray-500 animate-pulse">
+                    Fetching location...
+                  </p>
+                </div>
+              ) : locationError ? (
+                <div className="flex flex-col items-center justify-center py-4 gap-2 text-center">
+                  <AlertCircle
+                    size={28}
+                    color="#dc2626"
+                    className="opacity-80"
+                  />
+                  <p className="text-sm font-bold text-red-600">
+                    {locationError}
+                  </p>
+                  <button
+                    onClick={handleGetLocation}
+                    className="text-xs font-semibold text-gray-500 hover:text-gray-800 underline mt-1"
+                  >
+                    Try Again
+                  </button>
+                </div>
+              ) : location ? (
+                <div className="flex flex-col gap-4">
+                  <div className="flex items-center gap-3">
+                    <div className="w-2 h-2 rounded-full bg-green-500 animate-pulse" />
+                    <span className="text-xs font-bold uppercase tracking-wider text-green-600">
+                      Location Active
+                    </span>
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                        Latitude
+                      </p>
+                      <p className="text-sm font-bold text-gray-800">
+                        {location.latitude.toFixed(6)}
+                      </p>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                        Longitude
+                      </p>
+                      <p className="text-sm font-bold text-gray-800">
+                        {location.longitude.toFixed(6)}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              ) : (
+                <div className="flex flex-col items-center justify-center py-8 text-center gap-3">
+                  <Navigation
+                    size={32}
+                    color="var(--rak-gold)"
+                    className="opacity-40"
+                  />
+                  <p className="text-sm font-medium text-gray-400">
+                    No location shared yet
+                  </p>
+                </div>
+              )}
+            </div>
+          </motion.div>
+
           {/* 5. Safety Tips Widget */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -476,7 +629,16 @@ function Dashboard() {
                 {safetyTips.map((_, i) => (
                   <div
                     key={i}
-                    className={`h-1.5 rounded-full transition-all duration-500 ${i === currentTip ? "w-6 bg-var(--rak-gold)" : "w-2 bg-white/30"}`}
+                    className={`h-1.5 rounded-full transition-all duration-500 ${
+                      i === currentTip ? "w-6" : "w-2 bg-white/30"
+                    }`}
+                    style={
+                      i === currentTip
+                        ? {
+                            backgroundColor: "var(--rak-gold)",
+                          }
+                        : {}
+                    }
                   />
                 ))}
               </div>
