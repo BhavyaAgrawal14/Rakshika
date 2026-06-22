@@ -16,6 +16,8 @@ import {
   AlertCircle,
   Info,
   ShieldCheck,
+  Copy,
+  Check,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "../services/api";
@@ -84,6 +86,7 @@ function Dashboard() {
   const [location, setLocation] = useState(null);
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationError, setLocationError] = useState("");
+  const [copied, setCopied] = useState(false);
 
   const fetchContacts = async () => {
     try {
@@ -649,6 +652,72 @@ function Dashboard() {
                     </div>
                   </div>
                 </div>
+              </div>
+            </motion.div>
+          )}
+
+          {/* Emergency Message Generator Widget */}
+          {latestSOS && latestSOS.latitude != null && latestSOS.longitude != null && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.8 }}
+              className="bg-white/60 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow mt-8"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <div>
+                  <h2
+                    className="text-xl font-bold"
+                    style={{ color: "var(--rak-primary)" }}
+                  >
+                    Emergency Alert Message
+                  </h2>
+                  <p className="text-sm text-gray-500 font-medium mt-1">
+                    Share your exact location and status
+                  </p>
+                </div>
+                <button
+                  onClick={() => {
+                    const message = `🚨 RAKSHIKA SOS ALERT 🚨\n\nThis emergency alert was generated through Rakshika.\n\nCurrent Location:\nhttps://maps.google.com/?q=${latestSOS.latitude},${latestSOS.longitude}\n\nTimestamp: ${new Date(latestSOS.timestamp).toLocaleString()}\n\nPlease reach out immediately or contact emergency services if necessary.`;
+                    navigator.clipboard.writeText(message);
+                    setCopied(true);
+                    setTimeout(() => setCopied(false), 2000);
+                  }}
+                  className={`bg-white border text-gray-800 px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm group ${copied ? "border-green-400 bg-green-50" : "border-gray-200 hover:border-gray-300 hover:shadow"}`}
+                >
+                  {copied ? (
+                    <>
+                      <Check size={16} className="text-green-500" />
+                      <span className="text-green-700">Copied ✓</span>
+                    </>
+                  ) : (
+                    <>
+                      <Copy size={16} className="text-gray-500 group-hover:text-gray-800 transition-colors" />
+                      Copy Message
+                    </>
+                  )}
+                </button>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-gray-50 border border-gray-100 shadow-inner relative overflow-hidden text-sm text-gray-700 whitespace-pre-wrap font-medium leading-relaxed">
+                <span className="text-red-600 font-bold">🚨 RAKSHIKA SOS ALERT 🚨</span>
+                <br /><br />
+                This emergency alert was generated through Rakshika.
+                <br /><br />
+                <span className="text-gray-500">Current Location:</span>
+                <br />
+                <a 
+                  href={`https://maps.google.com/?q=${latestSOS.latitude},${latestSOS.longitude}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="text-blue-600 hover:underline break-all"
+                >
+                  https://maps.google.com/?q={latestSOS.latitude},{latestSOS.longitude}
+                </a>
+                <br /><br />
+                <span className="text-gray-500">Timestamp:</span> {new Date(latestSOS.timestamp).toLocaleString()}
+                <br /><br />
+                Please reach out immediately or contact emergency services if necessary.
               </div>
             </motion.div>
           )}
