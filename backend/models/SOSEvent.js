@@ -7,7 +7,14 @@ const sosEventSchema = new mongoose.Schema(
       ref: "User",
       required: true,
     },
-
+    latitude: {
+      type: Number,
+      default: null,
+    },
+    longitude: {
+      type: Number,
+      default: null,
+    },
     timestamp: {
       type: Date,
       default: Date.now,

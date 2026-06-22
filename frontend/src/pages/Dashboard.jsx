@@ -139,14 +139,61 @@ function Dashboard() {
   };
 
   const handleTriggerSOS = async () => {
-    try {
-      await API.post("/sos");
-      fetchSOSHistory();
-      alert("SOS Triggered Successfully! Alerts sent.");
-    } catch (error) {
-      console.log(error);
-      alert("Failed to trigger SOS.");
+    const sendSOS = async (lat, lng) => {
+  console.log("Sending SOS:", {
+    latitude: lat,
+    longitude: lng,
+  });
+
+  try {
+    const response = await API.post("/sos", {
+      latitude: lat,
+      longitude: lng,
+    });
+
+    console.log("SOS RESPONSE:", response.data);
+
+    fetchSOSHistory();
+    alert("SOS Triggered Successfully! Alerts sent.");
+  } catch (error) {
+    console.log(error);
+    alert("Failed to trigger SOS.");
+  }
+};
+
+    if (!navigator.geolocation) {
+      alert(
+        "Geolocation is not supported by your browser. Sending SOS without location.",
+      );
+      sendSOS(null, null);
+      return;
     }
+
+    navigator.geolocation.getCurrentPosition(
+      (position) => {
+        sendSOS(position.coords.latitude, position.coords.longitude);
+      },
+      (error) => {
+        let errorMsg = "Sending SOS without location.";
+        switch (error.code) {
+          case error.PERMISSION_DENIED:
+            errorMsg = "Location permission denied. " + errorMsg;
+            break;
+          case error.POSITION_UNAVAILABLE:
+            errorMsg = "Location unavailable. " + errorMsg;
+            break;
+          case error.TIMEOUT:
+            errorMsg = "Location request timed out. " + errorMsg;
+            break;
+          default:
+            errorMsg = "An unknown error occurred. " + errorMsg;
+            break;
+        }
+        alert(errorMsg);
+        sendSOS(null, null);
+      },
+      { timeout: 10000 },
+    );
   };
 
   const handleGetLocation = () => {
@@ -186,6 +233,8 @@ function Dashboard() {
       },
     );
   };
+
+  const latestSOS = sosEvents.length > 0 ? sosEvents[0] : null;
 
   return (
     <div className="max-w-7xl mx-auto p-6 md:p-10 pt-6">
@@ -475,36 +524,50 @@ function Dashboard() {
             </div>
 
             <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-linear-to-b before:from-gray-200 before:to-transparent">
-              {sosEvents
-                .slice()
-                .reverse()
-                .slice(0, 4)
-                .map((event, idx) => (
-                  <div
-                    key={event._id || idx}
-                    className="relative flex items-start gap-6 group"
-                  >
-                    <div className="w-10 h-10 rounded-full border-4 border-white bg-red-500 shadow-sm flex items-center justify-center shrink-0 z-10 group-hover:scale-110 transition-transform">
-                      <AlertCircle size={16} color="white" />
+              {sosEvents.slice(0, 4).map((event, idx) => (
+                <div
+                  key={event._id || idx}
+                  className="relative flex items-start gap-6 group"
+                >
+                  <div className="w-10 h-10 rounded-full border-4 border-white bg-red-500 shadow-sm flex items-center justify-center shrink-0 z-10 group-hover:scale-110 transition-transform">
+                    <AlertCircle size={16} color="white" />
+                  </div>
+                  <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex-1 hover:shadow-md transition-all">
+                    <div className="flex justify-between items-start mb-1">
+                      <h3 className="font-bold text-sm text-red-600">
+                        SOS Alert Triggered
+                      </h3>
+                      <span className="text-xs text-gray-500 font-bold whitespace-nowrap bg-gray-50 px-2 py-1 rounded-md">
+                        {new Date(event.timestamp).toLocaleTimeString([], {
+                          hour: "2-digit",
+                          minute: "2-digit",
+                        })}
+                      </span>
                     </div>
-                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex-1 hover:shadow-md transition-all">
-                      <div className="flex justify-between items-start mb-1">
-                        <h3 className="font-bold text-sm text-red-600">
-                          SOS Alert Triggered
-                        </h3>
-                        <span className="text-xs text-gray-500 font-bold whitespace-nowrap bg-gray-50 px-2 py-1 rounded-md">
-                          {new Date(event.timestamp).toLocaleTimeString([], {
-                            hour: "2-digit",
-                            minute: "2-digit",
-                          })}
+                    {event.latitude !== null && event.longitude !== null ? (
+                      <div className="mt-2 text-xs text-gray-500 font-medium bg-gray-50 p-2 rounded-lg border border-gray-100 flex gap-3">
+                        <span>
+                          <span className="text-gray-400">Lat:</span>{" "}
+                          {event.latitude != null
+                            ? event.latitude.toFixed(6)
+                            : "N/A"}
+                        </span>
+
+                        <span>
+                          <span className="text-gray-400">Lng:</span>{" "}
+                          {event.longitude != null
+                            ? event.longitude.toFixed(6)
+                            : "N/A"}
                         </span>
                       </div>
+                    ) : (
                       <p className="text-xs text-gray-500 font-medium">
                         {new Date(event.timestamp).toLocaleDateString()}
                       </p>
-                    </div>
+                    )}
                   </div>
-                ))}
+                </div>
+              ))}
               {sosEvents.length === 0 && (
                 <div className="relative z-10 pl-16">
                   <div className="bg-white/80 p-4 rounded-2xl border border-dashed border-gray-200">
@@ -516,6 +579,79 @@ function Dashboard() {
               )}
             </div>
           </motion.div>
+
+          {/* Latest SOS Event Widget */}
+          {latestSOS && (
+            <motion.div
+              initial={{ opacity: 0, y: 20 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ delay: 0.75 }}
+              className="bg-white/60 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow mt-8"
+            >
+              <div className="flex justify-between items-center mb-6">
+                <h2
+                  className="text-xl font-bold"
+                  style={{ color: "var(--rak-primary)" }}
+                >
+                  Latest SOS Event
+                </h2>
+                <span className="text-xs font-bold text-gray-400 uppercase tracking-wider bg-white px-3 py-1 rounded-full shadow-sm border border-gray-100">
+                  Details
+                </span>
+              </div>
+
+              <div className="p-5 rounded-2xl bg-white border border-gray-100 shadow-sm relative overflow-hidden">
+                <div className="flex flex-col gap-5">
+                  <div className="flex items-center gap-3">
+                    <div
+                      className={`w-2 h-2 rounded-full animate-pulse ${latestSOS.latitude !== null && latestSOS.longitude !== null ? "bg-green-500" : "bg-red-500"}`}
+                    />
+                    <span
+                      className={`text-xs font-bold uppercase tracking-wider ${latestSOS.latitude !== null && latestSOS.longitude !== null ? "text-green-600" : "text-red-600"}`}
+                    >
+                      Status:{" "}
+                      {latestSOS.latitude !== null &&
+                      latestSOS.longitude !== null
+                        ? "VERIFIED ✅"
+                        : "UNVERIFIED ❌"}
+                    </span>
+                  </div>
+
+                  {/* Vertical Stacked Details Layout */}
+                  <div className="flex flex-col gap-3">
+                    <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                        Timestamp
+                      </p>
+                      <p className="text-sm font-bold text-gray-800">
+                        {new Date(latestSOS.timestamp).toLocaleString()}
+                      </p>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                        Latitude
+                      </p>
+                      <p className="text-sm font-bold text-gray-800">
+                        {latestSOS?.latitude != null
+                          ? latestSOS.latitude.toFixed(6)
+                          : "N/A"}
+                      </p>
+                    </div>
+                    <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
+                      <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
+                        Longitude
+                      </p>
+                      <p className="text-sm font-bold text-gray-800">
+                        {latestSOS?.longitude != null
+                          ? latestSOS.longitude.toFixed(6)
+                          : "N/A"}
+                      </p>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </motion.div>
+          )}
         </div>
 
         {/* Right Column - Widgets */}
@@ -583,7 +719,9 @@ function Dashboard() {
                         Latitude
                       </p>
                       <p className="text-sm font-bold text-gray-800">
-                        {location.latitude.toFixed(6)}
+                        {location?.latitude != null
+                          ? location.latitude.toFixed(6)
+                          : "Fetching..."}
                       </p>
                     </div>
                     <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
@@ -591,7 +729,9 @@ function Dashboard() {
                         Longitude
                       </p>
                       <p className="text-sm font-bold text-gray-800">
-                        {location.longitude.toFixed(6)}
+                        {location?.longitude != null
+                          ? location.longitude.toFixed(6)
+                          : "Fetching..."}
                       </p>
                     </div>
                   </div>
