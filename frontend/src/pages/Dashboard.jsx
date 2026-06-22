@@ -18,6 +18,8 @@ import {
   ShieldCheck,
   Copy,
   Check,
+  MessageCircle,
+  X,
 } from "lucide-react";
 import { motion, AnimatePresence } from "framer-motion";
 import API from "../services/api";
@@ -87,6 +89,7 @@ function Dashboard() {
   const [locationLoading, setLocationLoading] = useState(false);
   const [locationError, setLocationError] = useState("");
   const [copied, setCopied] = useState(false);
+  const [showWhatsAppModal, setShowWhatsAppModal] = useState(false);
 
   const fetchContacts = async () => {
     try {
@@ -238,6 +241,12 @@ function Dashboard() {
   };
 
   const latestSOS = sosEvents.length > 0 ? sosEvents[0] : null;
+
+  const generateWhatsAppLink = (phone) => {
+    const cleanPhone = phone.replace(/[^\d+]/g, "");
+    const message = `🚨 RAKSHIKA SOS ALERT 🚨\n\nThis emergency alert was generated through Rakshika.\n\nCurrent Location:\nhttps://maps.google.com/?q=${latestSOS.latitude},${latestSOS.longitude}\n\nTimestamp: ${new Date(latestSOS.timestamp).toLocaleString()}\n\nPlease reach out immediately or contact emergency services if necessary.`;
+    return `https://wa.me/${cleanPhone}?text=${encodeURIComponent(message)}`;
+  };
 
   return (
     <div className="max-w-7xl mx-auto p-6 md:p-10 pt-6">
@@ -664,7 +673,7 @@ function Dashboard() {
               transition={{ delay: 0.8 }}
               className="bg-white/60 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow mt-8"
             >
-              <div className="flex justify-between items-center mb-6">
+              <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 mb-6">
                 <div>
                   <h2
                     className="text-xl font-bold"
@@ -676,27 +685,36 @@ function Dashboard() {
                     Share your exact location and status
                   </p>
                 </div>
-                <button
-                  onClick={() => {
-                    const message = `🚨 RAKSHIKA SOS ALERT 🚨\n\nThis emergency alert was generated through Rakshika.\n\nCurrent Location:\nhttps://maps.google.com/?q=${latestSOS.latitude},${latestSOS.longitude}\n\nTimestamp: ${new Date(latestSOS.timestamp).toLocaleString()}\n\nPlease reach out immediately or contact emergency services if necessary.`;
-                    navigator.clipboard.writeText(message);
-                    setCopied(true);
-                    setTimeout(() => setCopied(false), 2000);
-                  }}
-                  className={`bg-white border text-gray-800 px-4 py-2.5 rounded-xl text-sm font-bold flex items-center gap-2 transition-all shadow-sm group ${copied ? "border-green-400 bg-green-50" : "border-gray-200 hover:border-gray-300 hover:shadow"}`}
-                >
-                  {copied ? (
-                    <>
-                      <Check size={16} className="text-green-500" />
-                      <span className="text-green-700">Copied ✓</span>
-                    </>
-                  ) : (
-                    <>
-                      <Copy size={16} className="text-gray-500 group-hover:text-gray-800 transition-colors" />
-                      Copy Message
-                    </>
-                  )}
-                </button>
+                <div className="flex items-center gap-3 w-full md:w-auto">
+                  <button
+                    onClick={() => setShowWhatsAppModal(true)}
+                    className="flex-1 md:flex-none bg-green-50 border border-green-200 hover:border-green-300 hover:bg-green-100 text-green-700 px-4 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm group"
+                  >
+                    <MessageCircle size={16} className="text-green-600 group-hover:scale-110 transition-transform" />
+                    WhatsApp Contacts
+                  </button>
+                  <button
+                    onClick={() => {
+                      const message = `🚨 RAKSHIKA SOS ALERT 🚨\n\nThis emergency alert was generated through Rakshika.\n\nCurrent Location:\nhttps://maps.google.com/?q=${latestSOS.latitude},${latestSOS.longitude}\n\nTimestamp: ${new Date(latestSOS.timestamp).toLocaleString()}\n\nPlease reach out immediately or contact emergency services if necessary.`;
+                      navigator.clipboard.writeText(message);
+                      setCopied(true);
+                      setTimeout(() => setCopied(false), 2000);
+                    }}
+                    className={`flex-1 md:flex-none bg-white border px-4 py-2.5 rounded-xl text-sm font-bold flex items-center justify-center gap-2 transition-all shadow-sm group ${copied ? "border-green-400 bg-green-50 text-gray-800" : "border-gray-200 hover:border-gray-300 hover:shadow text-gray-800"}`}
+                  >
+                    {copied ? (
+                      <>
+                        <Check size={16} className="text-green-500" />
+                        <span className="text-green-700">Copied ✓</span>
+                      </>
+                    ) : (
+                      <>
+                        <Copy size={16} className="text-gray-500 group-hover:text-gray-800 transition-colors" />
+                        Copy Message
+                      </>
+                    )}
+                  </button>
+                </div>
               </div>
 
               <div className="p-5 rounded-2xl bg-gray-50 border border-gray-100 shadow-inner relative overflow-hidden text-sm text-gray-700 whitespace-pre-wrap font-medium leading-relaxed">
@@ -1052,6 +1070,74 @@ function Dashboard() {
           </motion.div>
         </div>
       </div>
+      <AnimatePresence>
+        {showWhatsAppModal && latestSOS && (
+          <motion.div
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 z-50 flex items-center justify-center p-4 bg-black/40 backdrop-blur-sm"
+          >
+            <motion.div
+              initial={{ scale: 0.95, opacity: 0, y: 20 }}
+              animate={{ scale: 1, opacity: 1, y: 0 }}
+              exit={{ scale: 0.95, opacity: 0, y: 20 }}
+              className="bg-white rounded-3xl p-6 md:p-8 w-full max-w-md shadow-2xl relative"
+            >
+              <button
+                onClick={() => setShowWhatsAppModal(false)}
+                className="absolute top-6 right-6 w-8 h-8 flex items-center justify-center rounded-full bg-gray-50 hover:bg-gray-200 text-gray-500 transition-colors"
+              >
+                <X size={18} />
+              </button>
+
+              <div className="mb-6">
+                <div className="w-12 h-12 rounded-full bg-green-100 flex items-center justify-center mb-4">
+                  <MessageCircle size={24} className="text-green-600" />
+                </div>
+                <h2 className="text-2xl font-bold" style={{ color: "var(--rak-primary)" }}>
+                  WhatsApp Alerts
+                </h2>
+                <p className="text-gray-500 text-sm mt-1">
+                  Send your emergency SOS directly to saved contacts.
+                </p>
+              </div>
+
+              <div className="max-h-[60vh] overflow-y-auto space-y-3 pr-2 custom-scrollbar">
+                {contacts.length === 0 ? (
+                  <div className="text-center py-8 bg-gray-50 rounded-2xl border border-dashed border-gray-200">
+                    <p className="text-gray-500 text-sm font-medium">No contacts saved to network.</p>
+                  </div>
+                ) : (
+                  contacts.map((contact) => (
+                    <div key={contact._id} className="flex items-center justify-between p-4 rounded-2xl border border-gray-100 hover:border-green-200 bg-white shadow-sm hover:shadow transition-all group">
+                      <div className="flex items-center gap-4">
+                        <div className="w-10 h-10 rounded-full flex items-center justify-center" style={{ backgroundColor: "rgba(106, 27, 77, 0.05)" }}>
+                          <User size={18} color="var(--rak-secondary)" />
+                        </div>
+                        <div>
+                          <p className="font-bold text-sm text-gray-800">{contact.name}</p>
+                          <p className="text-xs text-gray-500 font-medium flex items-center gap-1 mt-0.5">
+                            <Phone size={10} /> {contact.phone}
+                          </p>
+                        </div>
+                      </div>
+                      <a
+                        href={generateWhatsAppLink(contact.phone)}
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className="bg-green-50 hover:bg-green-500 border border-green-100 hover:border-green-500 text-green-600 hover:text-white w-10 h-10 rounded-full flex items-center justify-center transition-all hover:scale-105 shadow-sm group-hover:shadow"
+                      >
+                        <MessageCircle size={16} />
+                      </a>
+                    </div>
+                  ))
+                )}
+              </div>
+            </motion.div>
+          </motion.div>
+        )}
+      </AnimatePresence>
     </div>
   );
 }
