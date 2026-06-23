@@ -322,7 +322,7 @@ function Dashboard() {
       {/* Main Content Layout */}
       <div className="grid lg:grid-cols-3 gap-8">
         {/* Left Column - Actions & Timeline */}
-        <div className="lg:col-span-2 space-y-8">
+        <div className="lg:col-span-2 space-y-8 self-start">
           {/* 4. Quick Actions Panel */}
           <motion.div
             initial={{ opacity: 0, y: 20 }}
@@ -403,7 +403,17 @@ function Dashboard() {
                 </span>
               </button>
 
-              <button className="flex flex-col items-center justify-center gap-3 p-5 rounded-2xl bg-white hover:bg-gray-50 border border-gray-100 transition-all group shadow-sm">
+              <button
+                onClick={() => {
+                  document
+                    .getElementById("emergency-helplines")
+                    ?.scrollIntoView({
+                      behavior: "smooth",
+                      block: "start",
+                    });
+                }}
+                className="flex flex-col items-center justify-center gap-3 p-5 rounded-2xl bg-white hover:bg-gray-50 border border-gray-100 transition-all group shadow-sm"
+              >
                 <div
                   className="w-14 h-14 rounded-full flex items-center justify-center group-hover:scale-110 transition-transform shadow-inner"
                   style={{ backgroundColor: "rgba(106, 27, 77, 0.05)" }}
@@ -479,39 +489,41 @@ function Dashboard() {
                 </button>
               </div>
             ) : (
-              <div className="grid md:grid-cols-2 gap-4">
-                {contacts.map((contact) => (
-                  <div
-                    key={contact._id}
-                    className="bg-white border border-gray-100 rounded-2xl p-4 flex justify-between items-center hover:shadow-md hover:border-gray-200 transition-all group"
-                  >
-                    <div className="flex items-center gap-4">
-                      <div
-                        className="w-10 h-10 rounded-full flex items-center justify-center"
-                        style={{ backgroundColor: "rgba(106, 27, 77, 0.08)" }}
-                      >
-                        <User size={18} color="var(--rak-secondary)" />
-                      </div>
-                      <div>
-                        <h3
-                          className="font-bold text-sm"
-                          style={{ color: "var(--rak-primary)" }}
-                        >
-                          {contact.name}
-                        </h3>
-                        <p className="text-xs text-gray-500 font-medium flex items-center gap-1 mt-0.5">
-                          <Phone size={10} /> {contact.phone}
-                        </p>
-                      </div>
-                    </div>
-                    <button
-                      onClick={() => handleDeleteContact(contact._id)}
-                      className="w-8 h-8 rounded-full flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+              <div className="max-h-75 overflow-y-auto pr-2 custom-scrollbar">
+                <div className="grid md:grid-cols-2 gap-4">
+                  {contacts.map((contact) => (
+                    <div
+                      key={contact._id}
+                      className="bg-white border border-gray-100 rounded-2xl p-4 flex justify-between items-center hover:shadow-md hover:border-gray-200 transition-all group"
                     >
-                      <Trash2 size={16} />
-                    </button>
-                  </div>
-                ))}
+                      <div className="flex items-center gap-4">
+                        <div
+                          className="w-10 h-10 rounded-full flex items-center justify-center"
+                          style={{ backgroundColor: "rgba(106, 27, 77, 0.08)" }}
+                        >
+                          <User size={18} color="var(--rak-secondary)" />
+                        </div>
+                        <div>
+                          <h3
+                            className="font-bold text-sm"
+                            style={{ color: "var(--rak-primary)" }}
+                          >
+                            {contact.name}
+                          </h3>
+                          <p className="text-xs text-gray-500 font-medium flex items-center gap-1 mt-0.5">
+                            <Phone size={10} /> {contact.phone}
+                          </p>
+                        </div>
+                      </div>
+                      <button
+                        onClick={() => handleDeleteContact(contact._id)}
+                        className="w-8 h-8 rounded-full flex items-center justify-center text-gray-300 hover:text-red-500 hover:bg-red-50 transition-colors"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    </div>
+                  ))}
+                </div>
               </div>
             )}
           </motion.div>
@@ -535,60 +547,62 @@ function Dashboard() {
               </span>
             </div>
 
-            <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-linear-to-b before:from-gray-200 before:to-transparent">
-              {sosEvents.slice(0, 4).map((event, idx) => (
-                <div
-                  key={event._id || idx}
-                  className="relative flex items-start gap-6 group"
-                >
-                  <div className="w-10 h-10 rounded-full border-4 border-white bg-red-500 shadow-sm flex items-center justify-center shrink-0 z-10 group-hover:scale-110 transition-transform">
-                    <AlertCircle size={16} color="white" />
-                  </div>
-                  <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex-1 hover:shadow-md transition-all">
-                    <div className="flex justify-between items-start mb-1">
-                      <h3 className="font-bold text-sm text-red-600">
-                        SOS Alert Triggered
-                      </h3>
-                      <span className="text-xs text-gray-500 font-bold whitespace-nowrap bg-gray-50 px-2 py-1 rounded-md">
-                        {new Date(event.timestamp).toLocaleTimeString([], {
-                          hour: "2-digit",
-                          minute: "2-digit",
-                        })}
-                      </span>
+            <div className="max-h-87.5 overflow-y-auto pr-2 custom-scrollbar">
+              <div className="space-y-6 relative before:absolute before:inset-0 before:ml-5 before:-translate-x-px before:h-full before:w-0.5 before:bg-linear-to-b before:from-gray-200 before:to-transparent">
+                {sosEvents.map((event, idx) => (
+                  <div
+                    key={event._id || idx}
+                    className="relative flex items-start gap-6 group"
+                  >
+                    <div className="w-10 h-10 rounded-full border-4 border-white bg-red-500 shadow-sm flex items-center justify-center shrink-0 z-10 group-hover:scale-110 transition-transform">
+                      <AlertCircle size={16} color="white" />
                     </div>
-                    {event.latitude !== null && event.longitude !== null ? (
-                      <div className="mt-2 text-xs text-gray-500 font-medium bg-gray-50 p-2 rounded-lg border border-gray-100 flex gap-3">
-                        <span>
-                          <span className="text-gray-400">Lat:</span>{" "}
-                          {event.latitude != null
-                            ? event.latitude.toFixed(6)
-                            : "N/A"}
-                        </span>
-
-                        <span>
-                          <span className="text-gray-400">Lng:</span>{" "}
-                          {event.longitude != null
-                            ? event.longitude.toFixed(6)
-                            : "N/A"}
+                    <div className="bg-white p-4 rounded-2xl shadow-sm border border-gray-100 flex-1 hover:shadow-md transition-all">
+                      <div className="flex justify-between items-start mb-1">
+                        <h3 className="font-bold text-sm text-red-600">
+                          SOS Alert Triggered
+                        </h3>
+                        <span className="text-xs text-gray-500 font-bold whitespace-nowrap bg-gray-50 px-2 py-1 rounded-md">
+                          {new Date(event.timestamp).toLocaleTimeString([], {
+                            hour: "2-digit",
+                            minute: "2-digit",
+                          })}
                         </span>
                       </div>
-                    ) : (
-                      <p className="text-xs text-gray-500 font-medium">
-                        {new Date(event.timestamp).toLocaleDateString()}
+                      {event.latitude !== null && event.longitude !== null ? (
+                        <div className="mt-2 text-xs text-gray-500 font-medium bg-gray-50 p-2 rounded-lg border border-gray-100 flex gap-3">
+                          <span>
+                            <span className="text-gray-400">Lat:</span>{" "}
+                            {event.latitude != null
+                              ? event.latitude.toFixed(6)
+                              : "N/A"}
+                          </span>
+
+                          <span>
+                            <span className="text-gray-400">Lng:</span>{" "}
+                            {event.longitude != null
+                              ? event.longitude.toFixed(6)
+                              : "N/A"}
+                          </span>
+                        </div>
+                      ) : (
+                        <p className="text-xs text-gray-500 font-medium">
+                          {new Date(event.timestamp).toLocaleDateString()}
+                        </p>
+                      )}
+                    </div>
+                  </div>
+                ))}
+                {sosEvents.length === 0 && (
+                  <div className="relative z-10 pl-16">
+                    <div className="bg-white/80 p-4 rounded-2xl border border-dashed border-gray-200">
+                      <p className="text-gray-500 font-medium text-sm">
+                        No recent emergency alerts.
                       </p>
-                    )}
+                    </div>
                   </div>
-                </div>
-              ))}
-              {sosEvents.length === 0 && (
-                <div className="relative z-10 pl-16">
-                  <div className="bg-white/80 p-4 rounded-2xl border border-dashed border-gray-200">
-                    <p className="text-gray-500 font-medium text-sm">
-                      No recent emergency alerts.
-                    </p>
-                  </div>
-                </div>
-              )}
+                )}
+              </div>
             </div>
           </motion.div>
 
@@ -598,7 +612,7 @@ function Dashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.75 }}
-              className="bg-white/60 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow mt-8"
+              className="bg-white/60 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="flex justify-between items-center mb-6">
                 <h2
@@ -630,7 +644,7 @@ function Dashboard() {
                   </div>
 
                   {/* Vertical Stacked Details Layout */}
-                  <div className="flex flex-col gap-3">
+                  <div className="grid grid-cols-1 md:grid-cols-3 gap-3">
                     <div className="bg-gray-50 p-3 rounded-xl border border-gray-100">
                       <p className="text-[10px] font-bold text-gray-400 uppercase tracking-wider mb-1">
                         Timestamp
@@ -671,7 +685,7 @@ function Dashboard() {
               initial={{ opacity: 0, y: 20 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ delay: 0.8 }}
-              className="bg-white/60 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow mt-8"
+              className="bg-white/60 backdrop-blur-2xl border border-white/60 rounded-3xl p-6 md:p-8 shadow-sm hover:shadow-md transition-shadow"
             >
               <div className="flex flex-col md:flex-row md:justify-between items-start md:items-center gap-4 mb-6">
                 <div>
@@ -705,7 +719,7 @@ function Dashboard() {
                     {copied ? (
                       <>
                         <Check size={16} className="text-green-500" />
-                        <span className="text-green-700">Copied ✓</span>
+                        <span className="text-green-700">Copied </span>
                       </>
                     ) : (
                       <>
@@ -717,32 +731,46 @@ function Dashboard() {
                 </div>
               </div>
 
-              <div className="p-5 rounded-2xl bg-gray-50 border border-gray-100 shadow-inner relative overflow-hidden text-sm text-gray-700 whitespace-pre-wrap font-medium leading-relaxed">
-                <span className="text-red-600 font-bold">🚨 RAKSHIKA SOS ALERT 🚨</span>
-                <br /><br />
-                This emergency alert was generated through Rakshika.
-                <br /><br />
-                <span className="text-gray-500">Current Location:</span>
-                <br />
-                <a 
-                  href={`https://maps.google.com/?q=${latestSOS.latitude},${latestSOS.longitude}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-blue-600 hover:underline break-all"
-                >
-                  https://maps.google.com/?q={latestSOS.latitude},{latestSOS.longitude}
-                </a>
-                <br /><br />
-                <span className="text-gray-500">Timestamp:</span> {new Date(latestSOS.timestamp).toLocaleString()}
-                <br /><br />
-                Please reach out immediately or contact emergency services if necessary.
+              <div className="p-5 rounded-2xl bg-gray-50 border border-gray-100 shadow-inner relative overflow-hidden text-sm text-gray-700 font-medium leading-relaxed">
+                <div className="space-y-4">
+                  <div>
+                    <span className="text-red-600 font-bold">
+                      🚨 RAKSHIKA SOS ALERT 🚨
+                    </span>
+                  </div>
+
+                  <div>
+                    This emergency alert was generated through Rakshika.
+                  </div>
+
+                  <div>
+                    <span className="text-gray-500">Current Location:</span>
+                    <br />
+                    <a 
+                      href={`https://maps.google.com/?q=${latestSOS.latitude},${latestSOS.longitude}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      className="text-blue-600 hover:underline break-all"
+                    >
+                      https://maps.google.com/?q={latestSOS.latitude},{latestSOS.longitude}
+                    </a>
+                  </div>
+
+                  <div>
+                    <span className="text-gray-500">Timestamp:</span> {new Date(latestSOS.timestamp).toLocaleString()}
+                  </div>
+
+                  <div>
+                    Please reach out immediately or contact emergency services if necessary.
+                  </div>
+                </div>
               </div>
             </motion.div>
           )}
         </div>
 
         {/* Right Column - Widgets */}
-        <div className="space-y-8">
+        <div className="space-y-8 self-start">
           {/* Current Location Widget */}
           <motion.div
             initial={{ opacity: 0, x: 20 }}
@@ -1012,6 +1040,7 @@ function Dashboard() {
 
           {/* 6. Emergency Helplines Widget */}
           <motion.div
+            id="emergency-helplines"
             initial={{ opacity: 0, x: 20 }}
             animate={{ opacity: 1, x: 0 }}
             transition={{ delay: 0.9 }}
